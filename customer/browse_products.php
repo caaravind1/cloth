@@ -3,8 +3,8 @@ session_start();
 
 // Database connection parameters
 $servername = "localhost";
-$username = "root"; // Replace with your database username
-$password = ""; // Replace with your database password
+$username = "root"; 
+$password = ""; 
 $dbname = "cloth";
 
 // Create connection
@@ -38,7 +38,7 @@ $conn->close();
 
 // Check if the user is logged in
 $cart_access = isset($_SESSION['user_id']);
-$user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_name'] : ''; // Safely check if 'full_name' exists
+$user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_name'] : '';
 
 // Check for success message
 $cart_message = isset($_SESSION['cart_message']) ? $_SESSION['cart_message'] : '';
@@ -104,6 +104,18 @@ unset($_SESSION['cart_message']); // Clear the message after displaying
             left: 20px;
         }
 
+        .profile-icon {
+            display: flex;
+            align-items: center;
+        }
+
+        .profile-icon img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
         .container {
             margin-top: 20px;
             border-radius: 20px;
@@ -141,18 +153,17 @@ unset($_SESSION['cart_message']); // Clear the message after displaying
             margin: 0 10px; /* Spacing between images */
         }
 
-        /* Style for product container */
         .card {
             margin-bottom: 30px;
             border: none;
             border-radius: 20px; /* Curved corners for the product container */
             background-color: #3a3a3c; /* Dark card background */
             height: auto; /* Allow container to adjust to the image size */
-            display: flex; /* Flexbox to center contents */
-            flex-direction: column; /* Arrange children in a column */
+            display: flex;
+            flex-direction: column;
             align-items: center; /* Center items horizontally */
-            justify-content: flex-start; /* Align items at the start */
-            text-align: center; /* Center the text */
+            justify-content: flex-start;
+            text-align: center;
             transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hover effect */
         }
 
@@ -162,43 +173,42 @@ unset($_SESSION['cart_message']); // Clear the message after displaying
         }
 
         .product-img {
-            width: 100%; /* Set image width to fill container */
-            height: auto; /* Allow the height to adjust automatically */
-            max-height: 250px; /* Set a max height to keep images uniform */
-            object-fit: contain; /* Ensure the image covers the area without stretching */
-            border-radius: 20px; /* Curved corners for the image */
-            margin-bottom: 20px; /* Space below the image */
+            width: 100%; 
+            height: auto;
+            max-height: 250px; 
+            object-fit: contain; 
+            border-radius: 20px; 
+            margin-bottom: 20px;
         }
 
         .btn-primary {
             background-color: #007bff;
             border: none;
-            border-radius: 25px; /* Increased for oval shape */
-            padding: 10px 30px; /* Adjusted padding for a better oval shape */
+            border-radius: 25px; 
+            padding: 10px 30px;
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            margin: 5px; /* Added margin for spacing */
+            margin: 5px;
         }
 
         .btn-primary:hover {
-            background-color: #0056b3; /* Darker blue on hover */
+            background-color: #0056b3;
         }
 
-        /* Style for service cards */
         .services {
             margin-top: 40px;
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 20px; /* Adds spacing between the cards */
+            gap: 20px;
         }
 
         .service-card {
             background-color: #3a3a3c;
             border-radius: 20px;
             padding: 20px;
-            width: calc(33.333% - 20px); /* To make sure cards fit well with the gap */
+            width: calc(33.333% - 20px); 
             text-align: center;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -224,7 +234,7 @@ unset($_SESSION['cart_message']); // Clear the message after displaying
         }
 
         .row {
-            justify-content: center; /* Center the row items */
+            justify-content: center;
         }
     </style>
 </head>
@@ -237,10 +247,14 @@ unset($_SESSION['cart_message']); // Clear the message after displaying
     <div class="sticky-nav">
         <a href="browse_products.php">Home</a>
         <div class="login-signup">
-            <a href="customer_register.php">Login / Sign Up</a>
             <?php if ($cart_access): ?>
+                <div class="profile-icon">
+                    <img src="../uploads/profile.jpg" alt="Profile">
+                    <a href="profile.php"><?php echo htmlspecialchars($user_name); ?></a>
+                </div>
                 <a href="cart.php">Cart</a>
             <?php else: ?>
+                <a href="customer_register.php">Login / Sign Up</a>
                 <a href="customer_login.php">Cart</a>
             <?php endif; ?>
         </div>

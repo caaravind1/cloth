@@ -1,36 +1,64 @@
 <?php
 session_start();
 
+// Database connection parameters
+$servername = "localhost";
+$username = "root"; // Replace with your database username
+$password = ""; // Replace with your database password
+$dbname = "cloth";
+
+// Create a connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
 // Process login form
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    // Assuming login validation here (replace this with actual validation)
-    // For example, verify the email and password from the database
-    $user_id = 1; // Example user ID from database
-    $full_name = "John Doe"; // Example full name from database
+    // Fetch user details from the database
+    $sql = "SELECT id, full_name, password FROM users WHERE email = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+        
+        // Verify password (assuming password is hashed in the database)
+        if (password_verify($password, $user['password'])) {
+            // Password is correct, set session variables
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['full_name'] = $user['full_name'];
 
-    if ($user_id) {
-        $_SESSION['user_id'] = $user_id;
-        $_SESSION['full_name'] = $full_name;
-
-        // Redirect to the page they originally wanted to access
-        if (isset($_SESSION['redirect_to'])) {
-            header('Location: ' . $_SESSION['redirect_to']);
-            unset($_SESSION['redirect_to']);
-            exit();
+            // Redirect to the originally requested page or browse_products.php by default
+            if (isset($_SESSION['redirect_to']) && strpos($_SESSION['redirect_to'], 'customer_register.php') === false) {
+                header('Location: ' . $_SESSION['redirect_to']);
+                unset($_SESSION['redirect_to']);
+                exit();
+            } else {
+                header('Location: browse_products.php'); // Default after login
+                exit();
+            }
         } else {
-            header('Location: browse_products.php'); // Default after login
-            exit();
+            echo "Invalid password.";
         }
     } else {
-        // Invalid login credentials
-        echo "Invalid email or password.";
+        echo "No user found with that email.";
     }
+    
+    $stmt->close();
 }
 
-if (!isset($_SESSION['user_id']) && isset($_SERVER['HTTP_REFERER'])) {
+$conn->close();
+
+// Only store the redirect URL if it's not from the login or register page
+if (!isset($_SESSION['user_id']) && isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'login.php') === false && strpos($_SERVER['HTTP_REFERER'], 'customer_register.php') === false) {
     $_SESSION['redirect_to'] = $_SERVER['HTTP_REFERER']; // Store last page before login
 }
 ?>
