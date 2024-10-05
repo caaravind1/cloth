@@ -3,8 +3,8 @@ session_start();
 
 // Database connection parameters
 $servername = "localhost";
-$username = "root"; 
-$password = ""; 
+$username = "root"; // Replace with your database username
+$password = ""; // Replace with your database password
 $dbname = "cloth";
 
 // Create connection
@@ -79,6 +79,9 @@ unset($_SESSION['cart_message']); // Clear the message after displaying
             z-index: 1000;
             border-bottom: 1px solid #333;
             padding: 10px 0;
+            display: flex; /* Use flexbox for alignment */
+            justify-content: space-between; /* Space out elements */
+            align-items: center; /* Center items vertically */
         }
 
         .sticky-nav a {
@@ -92,28 +95,57 @@ unset($_SESSION['cart_message']); // Clear the message after displaying
             background-color: rgba(255, 255, 255, 0.1); /* Light hover effect */
         }
 
-        .login-signup {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
-
-        .home-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-        }
-
         .profile-icon {
             display: flex;
             align-items: center;
+            position: relative;
+            margin-left: 15px; /* Adjust left margin for alignment */
+            cursor: pointer; /* Change cursor to pointer for hover */
         }
 
         .profile-icon img {
             width: 30px;
             height: 30px;
             border-radius: 50%;
-            margin-right: 10px;
+            margin-right: 5px;
+        }
+
+        .profile-name {
+            color: #ffffff; /* White for name */
+            font-size: 14px;
+            margin-right: 10px; /* Space between name and dropdown */
+        }
+
+        .dropdown {
+            position: absolute;
+            display: none; /* Initially hidden */
+            background-color: #1f1f1f;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            min-width: 160px;
+            border-radius: 5px; /* Rounded corners */
+            right: 0; /* Align dropdown to the right of the profile icon */
+        }
+
+        .dropdown-content {
+            display: block; /* Show dropdown when hovered */
+        }
+
+        .dropdown-content a {
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            transition: background-color 0.3s; /* Smooth background transition */
+        }
+
+        .dropdown-content a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-icon:hover .dropdown {
+            display: block; /* Show dropdown on hover */
         }
 
         .container {
@@ -153,17 +185,18 @@ unset($_SESSION['cart_message']); // Clear the message after displaying
             margin: 0 10px; /* Spacing between images */
         }
 
+        /* Style for product container */
         .card {
             margin-bottom: 30px;
             border: none;
             border-radius: 20px; /* Curved corners for the product container */
             background-color: #3a3a3c; /* Dark card background */
             height: auto; /* Allow container to adjust to the image size */
-            display: flex;
-            flex-direction: column;
+            display: flex; /* Flexbox to center contents */
+            flex-direction: column; /* Arrange children in a column */
             align-items: center; /* Center items horizontally */
-            justify-content: flex-start;
-            text-align: center;
+            justify-content: flex-start; /* Align items at the start */
+            text-align: center; /* Center the text */
             transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hover effect */
         }
 
@@ -173,42 +206,43 @@ unset($_SESSION['cart_message']); // Clear the message after displaying
         }
 
         .product-img {
-            width: 100%; 
-            height: auto;
-            max-height: 250px; 
-            object-fit: contain; 
-            border-radius: 20px; 
-            margin-bottom: 20px;
+            width: 100%; /* Set image width to fill container */
+            height: auto; /* Allow the height to adjust automatically */
+            max-height: 250px; /* Set a max height to keep images uniform */
+            object-fit: contain; /* Ensure the image covers the area without stretching */
+            border-radius: 20px; /* Curved corners for the image */
+            margin-bottom: 20px; /* Space below the image */
         }
 
         .btn-primary {
             background-color: #007bff;
             border: none;
-            border-radius: 25px; 
-            padding: 10px 30px;
+            border-radius: 25px; /* Increased for oval shape */
+            padding: 10px 30px; /* Adjusted padding for a better oval shape */
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            margin: 5px;
+            margin: 5px; /* Added margin for spacing */
         }
 
         .btn-primary:hover {
-            background-color: #0056b3;
+            background-color: #0056b3; /* Darker blue on hover */
         }
 
+        /* Style for service cards */
         .services {
             margin-top: 40px;
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 20px; /* Adds spacing between the cards */
         }
 
         .service-card {
             background-color: #3a3a3c;
             border-radius: 20px;
             padding: 20px;
-            width: calc(33.333% - 20px); 
+            width: calc(33.333% - 20px); /* To make sure cards fit well with the gap */
             text-align: center;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -234,7 +268,7 @@ unset($_SESSION['cart_message']); // Clear the message after displaying
         }
 
         .row {
-            justify-content: center;
+            justify-content: center; /* Center the row items */
         }
     </style>
 </head>
@@ -250,12 +284,18 @@ unset($_SESSION['cart_message']); // Clear the message after displaying
             <?php if ($cart_access): ?>
                 <div class="profile-icon">
                     <img src="../uploads/profile.jpg" alt="Profile">
-                    <a href="profile.php"><?php echo htmlspecialchars($user_name); ?></a>
+                    <span class="profile-name"><?php echo htmlspecialchars($user_name); ?></span>
+                    <div class="dropdown">
+                        <div class="dropdown-content">
+                            <a href="profile.php">View Profile</a>
+                            <a href="orders.php">My Orders</a>
+                            <a href="cart.php">Cart</a>
+                            <a href="logout.php">Logout</a>
+                        </div>
+                    </div>
                 </div>
-                <a href="cart.php">Cart</a>
             <?php else: ?>
                 <a href="customer_register.php">Login / Sign Up</a>
-                <a href="customer_login.php">Cart</a>
             <?php endif; ?>
         </div>
     </div>
@@ -293,6 +333,7 @@ unset($_SESSION['cart_message']); // Clear the message after displaying
                                 <?php endif; ?>
                                 <p class="price">$<?php echo htmlspecialchars($row['price']); ?></p>
                                 <p><?php echo htmlspecialchars($row['description']); ?></p>
+                                <!-- Add to Cart Button -->
                                 <?php if ($cart_access): ?>
                                     <a href="add_to_cart.php?id=<?php echo $row['id']; ?>" class="btn btn-primary">Add to Cart</a>
                                 <?php else: ?>
