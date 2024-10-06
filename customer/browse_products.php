@@ -124,6 +124,7 @@ unset($_SESSION['cart_message']); // Clear the message after displaying
             z-index: 1;
             min-width: 160px;
             border-radius: 5px; /* Rounded corners */
+            top: 50px; /* Move dropdown below the profile icon */
             right: 0; /* Align dropdown to the right of the profile icon */
         }
 

@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// Database connection parameters
+// Database connection
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -13,32 +13,28 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-if (isset($_GET['id'])) {
+if (isset($_GET['id']) && isset($_SESSION['user_id'])) {
     $product_id = $_GET['id'];
-    
-    // Check if user_id is set in session
-    if (isset($_SESSION['user_id'])) {
-        $user_id = $_SESSION['user_id'];
-        
-        // Insert product into the cart
-        $stmt = $conn->prepare("INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)");
-        $quantity = 1; // Default quantity
+    $user_id = $_SESSION['user_id'];
 
-        // Bind and execute
-        $stmt->bind_param("iii", $user_id, $product_id, $quantity);
-        if ($stmt->execute()) {
-            $_SESSION['cart_message'] = "Product added to cart!";
-        } else {
-            $_SESSION['cart_message'] = "Failed to add product to cart.";
-        }
-        $stmt->close();
+    // Insert the product into the cart
+    $stmt = $conn->prepare("INSERT INTO cart (user_id, product_id) VALUES (?, ?)");
+    $stmt->bind_param("ii", $user_id, $product_id);
+
+    if ($stmt->execute()) {
+        // Set success message in session
+        $_SESSION['cart_message'] = "Product successfully added to cart!";
     } else {
-        $_SESSION['cart_message'] = "Please log in to add items to your cart.";
+        // Set error message if the insertion fails
+        $_SESSION['cart_message'] = "Failed to add product to cart.";
     }
 
+    // Redirect back to browse_products.php
     header("Location: browse_products.php");
     exit();
+} else {
+    // Redirect to login page if the user is not logged in
+    header("Location: customer_login.php");
+    exit();
 }
-
-$conn->close();
 ?>
