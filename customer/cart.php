@@ -16,7 +16,7 @@ if ($conn->connect_error) {
 }
 
 // Fetch items in the cart
-$sql = "SELECT c.quantity, p.id, p.name, p.price, p.image FROM cart c
+$sql = "SELECT c.id AS cart_id, c.quantity, p.id AS product_id, p.name, p.price, p.image FROM cart c
         JOIN products p ON c.product_id = p.id
         WHERE c.user_id = ?";
 $stmt = $conn->prepare($sql);
@@ -29,7 +29,6 @@ $conn->close();
 // Check if the user is logged in
 $cart_access = isset($_SESSION['user_id']);
 $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_name'] : ''; // Safely check if 'full_name' exists
-
 ?>
 
 <!DOCTYPE html>
@@ -66,6 +65,9 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
             z-index: 1000;
             border-bottom: 1px solid #333;
             padding: 10px 0;
+            display: flex; /* Use flexbox for alignment */
+            justify-content: space-between; /* Space out elements */
+            align-items: center; /* Center items vertically */
         }
 
         .sticky-nav a {
@@ -77,6 +79,52 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
 
         .sticky-nav a:hover {
             background-color: rgba(255, 255, 255, 0.1); /* Light hover effect */
+        }
+
+        .profile-icon {
+            display: flex;
+            align-items: center;
+            position: relative;
+            margin-left: 15px; /* Adjust left margin for alignment */
+            cursor: pointer; /* Change cursor to pointer for hover */
+        }
+
+        .profile-icon img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .profile-name {
+            color: #ffffff; /* White for name */
+            font-size: 14px;
+            margin-right: 10px; /* Space between name and dropdown */
+        }
+
+        .dropdown {
+            position: absolute;
+            display: none; /* Initially hidden */
+            background-color: #1f1f1f;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            min-width: 160px; 
+            border-radius: 5px; /* Rounded corners */
+            top: 50px; /* Move dropdown below the profile icon */
+            right: 0; /* Align dropdown to the right of the profile icon */
+        }
+
+        .dropdown-content a {
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            transition: background-color 0.3s; /* Smooth background transition */
+        }
+
+        .dropdown-content a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         .container {
@@ -106,6 +154,37 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
             border-radius: 10px; /* Curved corners for images */
         }
 
+        .remove-icon {
+            cursor: pointer; /* Change cursor to pointer for hover */
+            width: 40px; /* Set icon width to 40px */
+            height: 40px; /* Set icon height to 40px */
+            margin-left: 20px; /* Space between product details and remove icon */
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center; /* Center items vertically */
+            margin-left: 20px; /* Space between product details and quantity control */
+        }
+
+        .quantity-button {
+            background-color: #007bff;
+            border: none;
+            color: white;
+            border-radius: 5px; /* Rounded corners */
+            padding: 5px 10px; /* Padding for buttons */
+            cursor: pointer; /* Change cursor to pointer for hover */
+            margin: 0 5px; /* Space between buttons */
+        }
+
+        .quantity-display {
+            padding: 5px 10px; /* Padding for quantity display */
+            border: 1px solid #007bff;
+            border-radius: 5px; /* Rounded corners */
+            min-width: 30px; /* Minimum width for the display */
+            text-align: center; /* Center text */
+        }
+
         .btn-primary {
             background-color: #007bff;
             border: none;
@@ -129,11 +208,21 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
     <div class="sticky-nav">
         <a href="browse_products.php">Home</a>
         <div class="login-signup">
-            <a href="customer_register.php">Login / Sign Up</a>
             <?php if ($cart_access): ?>
-                <a href="cart.php">Cart</a>
+                <div class="profile-icon" id="profileDropdown">
+                    <img src="../uploads/profile.jpg" alt="Profile">
+                    <span class="profile-name"><?php echo htmlspecialchars($user_name); ?></span>
+                    <div class="dropdown" id="dropdownMenu">
+                        <div class="dropdown-content">
+                            <a href="profile.php">View Profile</a>
+                            <a href="orders.php">My Orders</a>
+                            <a href="cart.php">Cart</a>
+                            <a href="logout.php">Logout</a>
+                        </div>
+                    </div>
+                </div>
             <?php else: ?>
-                <a href="customer_login.php">Cart</a>
+                <a href="customer_register.php">Login / Sign Up</a>
             <?php endif; ?>
         </div>
     </div>
@@ -146,11 +235,18 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
             <?php while ($item = $result->fetch_assoc()): ?>
                 <div class="cart-item">
                     <img src="../uploads/<?php echo htmlspecialchars($item['image']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>">
-                    <div>
+                    <div style="flex-grow: 1;"> <!-- Make this div grow to take available space -->
                         <h5><?php echo htmlspecialchars($item['name']); ?></h5>
                         <p>Price: $<?php echo htmlspecialchars($item['price']); ?></p>
-                        <p>Quantity: <?php echo intval($item['quantity']); ?></p>
+                        <p>Quantity: 
+                            <div class="quantity-control">
+                                <button class="quantity-button" onclick="changeQuantity(<?php echo $item['product_id']; ?>, -1)">-</button>
+                                <span class="quantity-display" id="quantity-<?php echo $item['product_id']; ?>"><?php echo intval($item['quantity']); ?></span>
+                                <button class="quantity-button" onclick="changeQuantity(<?php echo $item['product_id']; ?>, 1)">+</button>
+                            </div>
+                        </p>
                     </div>
+                    <img src="../uploads/remove.jpg" alt="Remove" class="remove-icon" onclick="removeItem(<?php echo $item['cart_id']; ?>)">
                 </div>
             <?php endwhile; ?>
             <div class="text-center">
@@ -158,6 +254,30 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
             </div>
         <?php endif; ?>
     </div>
+
+    <script>
+        function removeItem(cartId) {
+            if (confirm("Are you sure you want to remove this item from the cart?")) {
+                window.location.href = "remove_from_cart.php?id=" + cartId; // Redirect to remove item script
+            }
+        }
+
+        function changeQuantity(productId, change) {
+            const quantityElement = document.getElementById('quantity-' + productId);
+            let currentQuantity = parseInt(quantityElement.innerText);
+
+            currentQuantity += change;
+
+            if (currentQuantity < 1) {
+                alert("Quantity cannot be less than 1.");
+                return;
+            }
+
+            // Here, you'd ideally send an AJAX request to update the quantity in the database
+            // For now, just update the display
+            quantityElement.innerText = currentQuantity;
+        }
+    </script>
 
 </body>
 </html>
