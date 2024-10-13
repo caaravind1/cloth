@@ -73,8 +73,14 @@ if (!isset($_SESSION['user_id']) && isset($_SERVER['HTTP_REFERER']) && strpos($_
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #121212;
-            color: #ffffff;
+            background-image: url('../uploads/mainbg.jpg'); 
+            background-size: cover; 
+            background-position: center; 
+            background-repeat: no-repeat; 
+            background-attachment: fixed; 
+            color: #ffffff; 
+            min-height: 100vh; 
+            margin: 0; 
         }
         .container {
             margin-top: 50px;

@@ -45,7 +45,35 @@ if (isset($_GET['id'])) {
     die("Invalid product ID.");
 }
 
+// Check if the Add to Cart button was clicked
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
+    if (isset($_SESSION['user_id'])) {
+        // Get user ID from session
+        $user_id = $_SESSION['user_id'];
+        
+        // Insert product into cart
+        $cart_sql = "INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)";
+        $cart_stmt = $conn->prepare($cart_sql);
+        $quantity = 1; // Default quantity is 1
+        $cart_stmt->bind_param("iii", $user_id, $product_id, $quantity);
+
+        if ($cart_stmt->execute()) {
+            $cart_success = "Product added to cart successfully!";
+        } else {
+            $cart_error = "Failed to add product to cart.";
+        }
+    } else {
+        // Redirect to login if user is not logged in
+        header('Location: customer_login.php');
+        exit();
+    }
+}
+
 $conn->close();
+
+// Check if user is logged in
+$cart_access = isset($_SESSION['user_id']);
+$user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_name'] : '';
 ?>
 
 <!DOCTYPE html>
@@ -62,8 +90,84 @@ $conn->close();
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #121212; /* Dark background */
-            color: #ffffff; /* Light text */
+            background-image: url('../uploads/mainbg.jpg'); 
+            background-size: cover; 
+            background-position: center; 
+            background-repeat: no-repeat; 
+            background-attachment: fixed; 
+            color: #ffffff; 
+            min-height: 100vh; 
+            margin: 0; 
+        }
+
+        .header {
+            background-color: #1f1f1f; /* Header background */
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 1px solid #333; /* Light border for separation */
+        }
+
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            background-color: #1f1f1f;
+            z-index: 1000;
+            border-bottom: 1px solid #333;
+            padding: 10px 0;
+            display: flex; /* Use flexbox for alignment */
+            justify-content: space-between; /* Space out elements */
+            align-items: center; /* Center items vertically */
+        }
+
+        .sticky-nav a {
+            color: #00ccff; /* Bright color for links */
+            text-decoration: none;
+            padding: 10px 20px;
+        }
+
+        .sticky-nav a:hover {
+            background-color: rgba(255, 255, 255, 0.1); /* Light hover effect */
+        }
+
+        .profile-icon {
+            display: flex;
+            align-items: center;
+            position: relative;
+            cursor: pointer; /* Change cursor to pointer for hover */
+        }
+
+        .profile-icon img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .dropdown {
+            position: absolute;
+            display: none; /* Initially hidden */
+            background-color: #1f1f1f;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            min-width: 160px; 
+            border-radius: 5px; /* Rounded corners */
+            top: 40px; /* Move dropdown below the profile icon */
+            right: 0; /* Align dropdown to the right of the profile icon */
+            z-index: 1;
+        }
+
+        .dropdown-content {
+            display: block; /* Make dropdown block element */
+        }
+
+        .dropdown-content a {
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block; /* Display as block for vertical stacking */
+        }
+
+        .dropdown-content a:hover {
+            background-color: rgba(255, 255, 255, 0.1); /* Hover effect */
         }
 
         .container {
@@ -127,37 +231,39 @@ $conn->close();
             margin-top: 20px;
             color: #cccccc; /* Light gray for footer text */
         }
-
-        .login-signup {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
     </style>
 </head>
 <body>
 
-<div class="login-signup">
-    <a href="customer_register.php" class="btn btn-primary">Login / Sign Up</a>
-    <?php if (isset($_SESSION['user_id'])): ?>
-        <a href="cart.php" class="btn btn-primary" title="Cart">
-            <img src="../uploads/cart.jpg" alt="Cart" style="width: 30px; height: 30px;"/> <!-- Cart Image -->
-        </a>
-    <?php else: ?>
-        <a href="customer_login.php" class="btn btn-primary" title="Cart">
-            <img src="../uploads/cart.jpg" alt="Cart" style="width: 30px; height: 30px;"/> <!-- Cart Image -->
-        </a>
-    <?php endif; ?>
+<div class="header">
+    <h1><?php echo htmlspecialchars($product['name']); ?></h1>
+</div>
+
+<div class="sticky-nav">
+    <a href="browse_products.php">Home</a>
+    <div class="profile-icon" id="profileDropdown">
+        <img src="../uploads/profile.jpg" alt="Profile">
+        <span class="profile-name"><?php echo htmlspecialchars($user_name); ?></span>
+        <div class="dropdown" id="dropdownMenu">
+            <div class="dropdown-content">
+                <a href="profile.php">View Profile</a>
+                <a href="orders.php">My Orders</a>
+                <a href="cart.php">Cart</a>
+                <a href="logout.php">Logout</a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="container">
-    <h1><?php echo htmlspecialchars($product['name']); ?></h1>
     <img src="../uploads/<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="product-img">
     <p class="price">$<?php echo htmlspecialchars($product['price']); ?></p>
     <p><?php echo htmlspecialchars($product['description']); ?></p>
 
-    <button class="btn btn-primary" onclick="alert('Added to cart!')">Add to Cart</button>
-    <br><br>
+    <form method="POST" action="">
+        <button type="submit" name="add_to_cart" class="btn btn-primary">Add to Cart</button>
+    </form>
+    <br>
     <a href="browse_products.php" class="btn btn-secondary">Back to Products</a>
 
     <div class="review-section">
@@ -179,6 +285,20 @@ $conn->close();
 <div class="footer">
     <p>&copy; 2024 Your Company Name. All Rights Reserved.</p>
 </div>
+
+<script>
+    document.getElementById('profileDropdown').addEventListener('click', function() {
+        const dropdown = document.getElementById('dropdownMenu');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    });
+
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('dropdownMenu');
+        if (!document.getElementById('profileDropdown').contains(event.target)) {
+            dropdown.style.display = 'none';
+        }
+    });
+</script>
 
 </body>
 </html>

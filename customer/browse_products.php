@@ -54,11 +54,18 @@ unset($_SESSION['cart_message']); // Clear the message after displaying
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #121212;
-            color: #ffffff;
-        }
+      body {
+    font-family: 'Poppins', sans-serif;
+    background-image: url('../uploads/mainbg.jpg'); 
+    background-size: cover; 
+    background-position: center; 
+    background-repeat: no-repeat; 
+    background-attachment: fixed; 
+    color: #ffffff; 
+    min-height: 100vh; 
+    margin: 0; 
+}
+
 
         .header {
             background-color: #1f1f1f;

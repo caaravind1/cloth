@@ -1,40 +1,48 @@
 <?php
 session_start();
 
-// Check if the user is logged in
 if (!isset($_SESSION['user_id'])) {
     header('Location: customer_login.php');
     exit();
 }
 
-// Database connection parameters
-$servername = "localhost";
-$username = "root"; // Replace with your database username
-$password = ""; // Replace with your database password
-$dbname = "cloth";
+$user_id = $_SESSION['user_id'];
+
+// Check if order_id is present in the POST request
+if (!isset($_POST['order_id'])) {
+    echo "No order specified.";
+    exit();
+}
+
+$order_id = $_POST['order_id'];
 
 // Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
+$conn = new mysqli("localhost", "root", "", "cloth");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Fetch user details from the database
-$user_id = $_SESSION['user_id'];
-$sql = "SELECT full_name, email FROM users WHERE id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$user = $result->fetch_assoc();
+// Simulate payment processing
+// In a real application, you would integrate with a payment gateway here.
+$payment_successful = true; // Simulating a successful payment
+
+if ($payment_successful) {
+    // Update the order status to "Paid"
+    $sql = "UPDATE orders SET status = 'Paid' WHERE id = ? AND user_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ii", $order_id, $user_id);
+    if ($stmt->execute()) {
+        $order_status = 'Paid';
+    } else {
+        echo "Failed to update order status.";
+        exit();
+    }
+} else {
+    echo "Payment failed. Please try again.";
+    exit();
+}
 
 $conn->close();
-
-// Check if user is logged in
-$cart_access = isset($_SESSION['user_id']);
-$user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_name'] : '';
 ?>
 
 <!DOCTYPE html>
@@ -42,10 +50,11 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
+    <title>Payment Confirmation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <style>
-       body {
+        body {
             font-family: 'Poppins', sans-serif;
             background-image: url('../uploads/mainbg.jpg'); 
             background-size: cover; 
@@ -109,80 +118,86 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
             display: none; /* Initially hidden */
             background-color: #1f1f1f;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
             min-width: 160px; 
             border-radius: 5px; /* Rounded corners */
-            top: 40px; /* Move dropdown below the profile icon */
+            top: 50px; /* Move dropdown below the profile icon */
             right: 0; /* Align dropdown to the right of the profile icon */
-            z-index: 1;
-        }
-
-        .dropdown-content {
-            display: block; /* Make dropdown block element */
         }
 
         .dropdown-content a {
             color: white;
             padding: 12px 16px;
             text-decoration: none;
-            display: block; /* Display as block for vertical stacking */
+            display: block;
+            text-align: left;
+            transition: background-color 0.3s; /* Smooth background transition */
         }
 
         .dropdown-content a:hover {
-            background-color: rgba(255, 255, 255, 0.1); /* Hover effect */
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         .container {
-            margin-top: 50px;
-            background-color: #1f1f1f; /* Darker container */
-            border-radius: 10px;
+            margin-top: 20px;
+            border-radius: 20px;
+            background-color: #1f1f1f; /* Darker container background */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             padding: 20px;
-            max-width: 600px; /* Set max width for the container */
-            margin: 50px auto; /* Center the container */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); /* Soft shadow */
+            max-width: 800px; /* Increased width for larger displays */
+            margin: 50px auto;
         }
 
         .btn-primary {
             background-color: #007bff;
             border: none;
-            border-radius: 50px; /* Oval shape */
-            padding: 10px 20px;
+            border-radius: 25px; /* Increased for oval shape */
+            padding: 10px 20px; /* Adjusted padding for a better oval shape */
+            cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
         .btn-primary:hover {
-            background-color: #0056b3;
+            background-color: #0056b3; /* Darker blue on hover */
         }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>Profile</h1>
+    <h1>Payment Confirmation</h1>
 </div>
 
 <div class="sticky-nav">
     <a href="browse_products.php">Home</a>
-    <div class="profile-icon" id="profileDropdown">
-        <img src="../uploads/profile.jpg" alt="Profile">
-        <span class="profile-name"><?php echo htmlspecialchars($user_name); ?></span>
-        <div class="dropdown" id="dropdownMenu">
-            <div class="dropdown-content">
-                <a href="profile.php">View Profile</a>
-                <a href="orders.php">My Orders</a>
-                <a href="cart.php">Cart</a>
-                <a href="logout.php">Logout</a>
+    <div class="login-signup">
+        <?php if (isset($_SESSION['user_id'])): ?>
+            <div class="profile-icon" id="profileDropdown">
+                <img src="../uploads/profile.jpg" alt="Profile">
+                <span class="profile-name"><?php echo htmlspecialchars($_SESSION['full_name']); ?></span>
+                <div class="dropdown" id="dropdownMenu">
+                    <div class="dropdown-content">
+                        <a href="profile.php">View Profile</a>
+                        <a href="orders.php">My Orders</a>
+                        <a href="cart.php">Cart</a>
+                        <a href="logout.php">Logout</a>
+                    </div>
+                </div>
             </div>
-        </div>
+        <?php else: ?>
+            <a href="customer_register.php">Login / Sign Up</a>
+        <?php endif; ?>
     </div>
 </div>
 
 <div class="container">
-    <h2 class="text-center">User Details</h2>
-
-    <p><strong>Full Name:</strong> <?php echo htmlspecialchars($user['full_name']); ?></p>
-    <p><strong>Email:</strong> <?php echo htmlspecialchars($user['email']); ?></p>
-
+    <h2 class="text-center">Thank You!</h2>
+    <p>Your payment was successful!</p>
+    <p>Your order status is now: <strong><?php echo htmlspecialchars($order_status); ?></strong></p>
+    <p>You will receive a confirmation email shortly.</p>
     <div class="text-center">
-        <a href="update_profile.php" class="btn btn-primary">Update Profile</a>
+        <a href="orders.php" class="btn btn-primary">View Your Orders</a>
+        <a href="browse_products.php" class="btn btn-primary">Continue Shopping</a>
     </div>
 </div>
 

@@ -30,9 +30,15 @@ $conn->close();
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <style>
         body {
-            font-family: 'Poppins', sans-serif; /* Using a clean font */
-            background-color: #121212; /* Dark background */
-            color: #ffffff; /* Light text */
+            font-family: 'Poppins', sans-serif;
+            background-image: url('../uploads/mainbg.jpg'); 
+            background-size: cover; 
+            background-position: center; 
+            background-repeat: no-repeat; 
+            background-attachment: fixed; 
+            color: #ffffff; 
+            min-height: 100vh; 
+            margin: 0; 
         }
 
         .container {

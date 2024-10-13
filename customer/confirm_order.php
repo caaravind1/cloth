@@ -8,19 +8,47 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
+// Ensure order_id is present in the query string
+if (!isset($_GET['order_id'])) {
+    echo "Order not found.";
+    exit();
+}
+
+$order_id = $_GET['order_id'];
+
+// Create connection
 $conn = new mysqli("localhost", "root", "", "cloth");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT c.id AS cart_id, c.quantity, p.id AS product_id, p.name, p.price, p.image 
-        FROM cart c 
-        JOIN products p ON c.product_id = p.id 
-        WHERE c.user_id = ?";
+// Fetch order and user details
+$sql = "SELECT o.id, o.total_amount, o.shipping_address, o.payment_method, o.status, 
+               u.full_name, u.email 
+        FROM orders o 
+        JOIN users u ON o.user_id = u.id 
+        WHERE o.id = ? AND o.user_id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
+$stmt->bind_param("ii", $order_id, $user_id);
 $stmt->execute();
-$result = $stmt->get_result();
+$order_result = $stmt->get_result();
+
+if ($order_result->num_rows === 0) {
+    echo "Order not found.";
+    exit();
+}
+
+$order = $order_result->fetch_assoc();
+
+// Fetch order items
+$item_sql = "SELECT oi.quantity, oi.price, p.name, p.image 
+             FROM order_items oi 
+             JOIN products p ON oi.product_id = p.id 
+             WHERE oi.order_id = ?";
+$item_stmt = $conn->prepare($item_sql);
+$item_stmt->bind_param("i", $order_id);
+$item_stmt->execute();
+$item_result = $item_stmt->get_result();
 
 $conn->close();
 
@@ -33,21 +61,21 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping Cart</title>
+    <title>Order Confirmation</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <style>
-         body {
-    font-family: 'Poppins', sans-serif;
-    background-image: url('../uploads/mainbg.jpg'); 
-    background-size: cover; 
-    background-position: center; 
-    background-repeat: no-repeat; 
-    background-attachment: fixed; 
-    color: #ffffff; 
-    min-height: 100vh; 
-    margin: 0; 
-}
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-image: url('../uploads/mainbg.jpg'); 
+            background-size: cover; 
+            background-position: center; 
+            background-repeat: no-repeat; 
+            background-attachment: fixed; 
+            color: #ffffff; 
+            min-height: 100vh; 
+            margin: 0; 
+        }
 
         .header {
             background-color: #1f1f1f;
@@ -124,16 +152,15 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
             margin-top: 20px;
             border-radius: 20px;
             background-color: #1f1f1f;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             padding: 20px;
-            max-width: 1200px;
+            max-width: 800px;
             margin: 50px auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .cart-item {
             display: flex;
             align-items: center;
-            justify-content: space-between;
             margin-bottom: 20px;
             padding: 10px;
             border: 1px solid #333;
@@ -147,54 +174,17 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
             border-radius: 10px;
         }
 
-        .remove-icon {
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            margin-left: 20px;
-        }
-
-        .quantity-control {
-            display: flex;
-            align-items: center;
-            margin-left: 20px;
-        }
-
-        .quantity-button {
-            background-color: #007bff;
-            border: none;
-            color: white;
-            border-radius: 5px;
-            padding: 5px 10px;
-            cursor: pointer;
-            margin: 0 5px;
-        }
-
-        .quantity-display {
-            padding: 5px 10px;
-            border: 1px solid #007bff;
-            border-radius: 5px;
-            min-width: 30px;
-            text-align: center;
-        }
-
-        .btn-primary {
-            background-color: #007bff;
-            border: none;
-            border-radius: 25px;
-            padding: 10px 20px;
-            cursor: pointer;
-        }
-
-        .btn-primary:hover {
-            background-color: #0056b3;
+        .total {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>Your Shopping Cart</h1>
+    <h1>Order Confirmation</h1>
 </div>
 
 <div class="sticky-nav">
@@ -220,29 +210,38 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
 </div>
 
 <div class="container">
-    <?php if ($result->num_rows == 0): ?>
-        <p>Your cart is empty.</p>
-    <?php else: ?>
-        <h2 class="text-center">Items in Your Cart</h2>
-        <?php while ($item = $result->fetch_assoc()): ?>
-            <div class="cart-item">
-                <img src="../uploads/<?php echo htmlspecialchars($item['image']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>">
-                <div style="flex-grow: 1;">
-                    <h5><?php echo htmlspecialchars($item['name']); ?></h5>
-                    <p>Price: $<?php echo htmlspecialchars($item['price']); ?></p>
-                    <div class="quantity-control">
-                        <button class="quantity-button" onclick="changeQuantity(<?php echo $item['product_id']; ?>, -1)">-</button>
-                        <span class="quantity-display" id="quantity-<?php echo $item['product_id']; ?>"><?php echo intval($item['quantity']); ?></span>
-                        <button class="quantity-button" onclick="changeQuantity(<?php echo $item['product_id']; ?>, 1)">+</button>
-                    </div>
-                </div>
-                <img src="../uploads/remove.jpg" alt="Remove" class="remove-icon" onclick="removeItem(<?php echo $item['cart_id']; ?>)">
+    <h2 class="text-center">Thank you for your order!</h2>
+    <p><strong>Order ID:</strong> <?php echo htmlspecialchars($order['id']); ?></p>
+    <p><strong>Name:</strong> <?php echo htmlspecialchars($order['full_name']); ?></p>
+    <p><strong>Email:</strong> <?php echo htmlspecialchars($order['email']); ?></p>
+    <p><strong>Shipping Address:</strong> <?php echo htmlspecialchars($order['shipping_address']); ?></p>
+    <p><strong>Payment Method:</strong> <?php echo htmlspecialchars($order['payment_method']); ?></p>
+    <p><strong>Status:</strong> <?php echo htmlspecialchars($order['status']); ?></p>
+
+    <h3 class="text-center">Order Summary</h3>
+
+    <?php while ($item = $item_result->fetch_assoc()): ?>
+        <div class="cart-item">
+            <img src="../uploads/<?php echo htmlspecialchars($item['image']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>">
+            <div>
+                <h5><?php echo htmlspecialchars($item['name']); ?></h5>
+                <p>Quantity: <?php echo intval($item['quantity']); ?></p>
+                <p>Price: $<?php echo number_format($item['price'], 2); ?></p>
             </div>
-        <?php endwhile; ?>
-        <div class="text-center">
-            <a href="checkout.php" class="btn btn-primary">Proceed to Checkout</a>
         </div>
-    <?php endif; ?>
+    <?php endwhile; ?>
+
+    <div class="total">
+        Total Amount: $<?php echo number_format($order['total_amount'], 2); ?>
+    </div>
+
+    <!-- Button to proceed to payment -->
+    <div class="text-center">
+        <form action="dummy_payment.php" method="post">
+            <input type="hidden" name="order_id" value="<?php echo htmlspecialchars($order['id']); ?>">
+            <button type="submit" class="btn btn-primary">Proceed to Payment</button>
+        </form>
+    </div>
 </div>
 
 <script>
@@ -257,19 +256,6 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
             dropdown.style.display = 'none';
         }
     });
-
-    function removeItem(cartId) {
-        if (confirm("Are you sure you want to remove this item?")) {
-            window.location.href = "remove_from_cart.php?id=" + cartId;
-        }
-    }
-
-    function changeQuantity(productId, change) {
-        const quantityElement = document.getElementById('quantity-' + productId);
-        let currentQuantity = parseInt(quantityElement.innerText);
-        currentQuantity = Math.max(1, currentQuantity + change);
-        quantityElement.innerText = currentQuantity;
-    }
 </script>
 
 </body>
