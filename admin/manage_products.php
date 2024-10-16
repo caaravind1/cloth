@@ -38,7 +38,6 @@ if (isset($_GET['delete'])) {
     $stmt = $conn->prepare($delete_sql);
     $stmt->bind_param("i", $product_id);
     if ($stmt->execute()) {
-        // Delete the image file from the uploads directory
         if (!empty($image) && file_exists("../uploads/" . $image)) {
             unlink("../uploads/" . $image);
         }
@@ -66,16 +65,96 @@ $conn->close();
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <style>
         body {
-            background-color: #f8f9fa;
-            color: #333;
+            font-family: 'Poppins', sans-serif;
+            background-image: url('../uploads/adminbg.jpg'); 
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #ffffff;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+
+        .header {
+            background-color: #1f1f1f;
+            padding: 15px 20px;
+            border-bottom: 1px solid #333;
+        }
+
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            background-color: #1f1f1f;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .sticky-nav a {
+            color: #00ccff;
+            text-decoration: none;
+            padding: 10px 20px;
+        }
+
+        .profile-icon {
+            display: flex;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .profile-icon img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .dropdown {
+            position: absolute;
+            display: none;
+            background-color: #1f1f1f;
+            min-width: 160px;
+            border-radius: 5px;
+            top: 40px;
+            right: 0;
+            z-index: 1;
+        }
+
+        .dropdown-content a {
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         .container {
             margin-top: 50px;
         }
 
-        .btn-primary, .btn-danger, .btn-secondary {
-            border-radius: 50px;
+        table {
+            background-color: #1f1f1f;
+            color: #ffffff; /* White text */
+            border-radius: 15px;
+        }
+
+        table th, table td {
+            border-bottom: 1px solid #444;
+            color: #ffffff; /* White text */
+        }
+
+        img {
+            max-width: 100px;
+            height: auto;
+            border-radius: 8px;
         }
 
         .btn-primary {
@@ -104,65 +183,88 @@ $conn->close();
         .btn-secondary:hover {
             background-color: #5a6268;
         }
-
-        table {
-            background-color: #ffffff;
-            color: #333;
-            border-radius: 15px;
-        }
-
-        table th, table td {
-            border-bottom: 1px solid #ddd;
-        }
-
-        img {
-            max-width: 100px;
-            height: auto;
-            border-radius: 8px;
-        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2 class="text-center">Manage Products</h2>
-        <a href="add_product.php" class="btn btn-secondary mb-3">Add New Product</a>
 
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Description</th>
-                    <th>Image</th>
-                    <th>Category</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if ($result->num_rows > 0): ?>
-                    <?php while ($row = $result->fetch_assoc()): ?>
-                        <tr>
-                            <td><?php echo $row['id']; ?></td>
-                            <td><?php echo htmlspecialchars($row['name']); ?></td>
-                            <td>$<?php echo htmlspecialchars($row['price']); ?></td>
-                            <td><?php echo htmlspecialchars($row['description']); ?></td>
-                            <td><img src="../uploads/<?php echo htmlspecialchars($row['image']); ?>" alt="<?php echo htmlspecialchars($row['name']); ?>"></td>
-                            <td><?php echo htmlspecialchars($row['category_name']); ?></td>
-                            <td>
-                                <a href="edit_product.php?id=<?php echo $row['id']; ?>" class="btn btn-primary btn-sm">Edit</a>
-                                <a href="manage_products.php?delete=<?php echo $row['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this product?');">Remove</a>
-                            </td>
-                        </tr>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <tr>
-                        <td colspan="7" class="text-center">No products found.</td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
-        <button onclick="window.location.href='admin_home.php';" class="btn btn-secondary">Back to Admin Home</button>
+<div class="header">
+    <h1>Manage Products</h1>
+</div>
+
+<div class="sticky-nav">
+    <a href="admin_home.php">Home</a>
+    <div class="profile-icon" id="profileDropdown">
+        <img src="../uploads/profile.jpg" alt="Profile">
+        <span><?php echo htmlspecialchars($_SESSION['full_name']); ?></span>
+        <div class="dropdown" id="dropdownMenu">
+            <div class="dropdown-content">
+                <a href="manage_categories.php">Manage Categories</a>
+                <a href="manage_products.php">Manage Products</a>
+                <a href="manage_staff.php">Manage Staff</a>
+                <a href="manage_customers.php">Manage Customers</a>
+                <a href="sales_reports.php">Sales Reports</a>
+            </div>
+        </div>
     </div>
+</div>
+
+<div class="container">
+    <h2 class="text-center">Products</h2>
+    <a href="add_product.php" class="btn btn-secondary mb-3">Add New Product</a>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Description</th>
+                <th>Image</th>
+                <th>Category</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php if ($result->num_rows > 0): ?>
+                <?php while ($row = $result->fetch_assoc()): ?>
+                    <tr>
+                        <td><?php echo $row['id']; ?></td>
+                        <td><?php echo htmlspecialchars($row['name']); ?></td>
+                        <td>$<?php echo htmlspecialchars($row['price']); ?></td>
+                        <td><?php echo htmlspecialchars($row['description']); ?></td>
+                        <td><img src="../uploads/<?php echo htmlspecialchars($row['image']); ?>" alt="<?php echo htmlspecialchars($row['name']); ?>"></td>
+                        <td><?php echo htmlspecialchars($row['category_name']); ?></td>
+                        <td>
+                            <a href="edit_product.php?id=<?php echo $row['id']; ?>" class="btn btn-primary btn-sm">Edit</a>
+                            <a href="manage_products.php?delete=<?php echo $row['id']; ?>" 
+                               class="btn btn-danger btn-sm" 
+                               onclick="return confirm('Are you sure you want to delete this product?');">Remove</a>
+                        </td>
+                    </tr>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <tr>
+                    <td colspan="7" class="text-center">No products found.</td>
+                </tr>
+            <?php endif; ?>
+        </tbody>
+    </table>
+    <button onclick="window.location.href='admin_home.php';" class="btn btn-secondary">Back to Admin Home</button>
+</div>
+
+<script>
+    document.getElementById('profileDropdown').addEventListener('click', function () {
+        const dropdown = document.getElementById('dropdownMenu');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    });
+
+    document.addEventListener('click', function (event) {
+        const dropdown = document.getElementById('dropdownMenu');
+        if (!document.getElementById('profileDropdown').contains(event.target)) {
+            dropdown.style.display = 'none';
+        }
+    });
+</script>
+
 </body>
 </html>

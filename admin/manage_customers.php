@@ -37,8 +37,34 @@ $result = $conn->query($sql);
     <title>Manage Customers</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-image: url('../uploads/adminbg.jpg'); 
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #ffffff;
+            min-height: 100vh;
+            margin: 0;
+        }
+
         .container {
             margin-top: 50px;
+        }
+
+        .table {
+            background-color: #1f1f1f; /* Dark background for table */
+            color: #ffffff; /* White text color */
+        }
+
+        .table th {
+            background-color: #2c2c2e; /* Darker header background */
+            color: #ffffff; /* White text color for header */
+        }
+
+        .table tbody tr {
+            border-bottom: 1px solid #444; /* Darker border for rows */
         }
 
         .btn-primary {

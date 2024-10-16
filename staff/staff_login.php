@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 // Database connection parameters
 $servername = "localhost";
 $username = "root";
@@ -37,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['role_id'] = 3;
 
             // Redirect to staff home page
-            header("Location: staff_home.php");
+            header("Location: staff_dashboard.php");
             exit();
         } else {
             $error = "Invalid email or password.";
@@ -52,31 +54,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Login</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
+          body {
+            font-family: 'Poppins', sans-serif;
+            background-image: url('../uploads/staffbg.jpg'); /* Add a background image for the staff home */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #ffffff;
+            min-height: 100vh;
             margin: 0;
-            padding: 0;
         }
 
         .container {
             max-width: 400px;
             margin: 50px auto;
             padding: 20px;
-            background-color: #ffffff;
+            background-color: rgba(31, 31, 31, 0.9); /* Dark, semi-transparent background */
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
 
         h2 {
-            color: #333;
+            color: #ffffff; /* White text for heading */
             margin-bottom: 20px;
         }
 
@@ -86,19 +93,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         label {
             font-weight: bold;
-            color: #555;
+            color: #ffffff; /* White text for labels */
         }
 
         .form-control {
             border-radius: 4px;
-            border: 1px solid #ced4da;
+            border: 1px solid #444; /* Darker border for input */
             padding: 10px;
             font-size: 16px;
+            background-color: #222; /* Dark background for inputs */
+            color: #ffffff; /* White text for inputs */
         }
 
         .btn {
-            background-color: #007bff;
-            color: #ffffff;
+            background-color: #007bff; /* Button background */
+            color: #ffffff; /* Button text color */
             border: none;
             border-radius: 4px;
             padding: 10px 15px;
@@ -108,11 +117,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         .btn:hover {
-            background-color: #0056b3;
+            background-color: #0056b3; /* Darker button on hover */
         }
 
         .text-danger {
-            color: #dc3545;
+            color: #dc3545; /* Danger text color */
+        }
+
+        .text-center {
+            color: #ffffff; /* White text for links */
         }
     </style>
 </head>
@@ -134,7 +147,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <button type="submit" class="btn">Login</button>
         </form>
         <p class="text-center mt-3">
-            Don't have an account? <a href="staff_register.php">Register here</a>
+            Don't have an account? <a href="staff_register.php" style="color: #00ccff;">Register here</a>
         </p>
     </div>
 </body>

@@ -8,11 +8,13 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
+// Create connection
 $conn = new mysqli("localhost", "root", "", "cloth");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Fetch items in the cart
 $sql = "SELECT c.id AS cart_id, c.quantity, p.id AS product_id, p.name, p.price, p.image 
         FROM cart c 
         JOIN products p ON c.product_id = p.id 
@@ -33,21 +35,21 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping Cart</title>
+    <title>Your Shopping Cart</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <style>
-         body {
-    font-family: 'Poppins', sans-serif;
-    background-image: url('../uploads/mainbg.jpg'); 
-    background-size: cover; 
-    background-position: center; 
-    background-repeat: no-repeat; 
-    background-attachment: fixed; 
-    color: #ffffff; 
-    min-height: 100vh; 
-    margin: 0; 
-}
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-image: url('../uploads/mainbg.jpg'); 
+            background-size: cover; 
+            background-position: center; 
+            background-repeat: no-repeat; 
+            background-attachment: fixed; 
+            color: #ffffff; 
+            min-height: 100vh; 
+            margin: 0; 
+        }
 
         .header {
             background-color: #1f1f1f;
@@ -160,16 +162,6 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
             margin-left: 20px;
         }
 
-        .quantity-button {
-            background-color: #007bff;
-            border: none;
-            color: white;
-            border-radius: 5px;
-            padding: 5px 10px;
-            cursor: pointer;
-            margin: 0 5px;
-        }
-
         .quantity-display {
             padding: 5px 10px;
             border: 1px solid #007bff;
@@ -231,9 +223,9 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
                     <h5><?php echo htmlspecialchars($item['name']); ?></h5>
                     <p>Price: $<?php echo htmlspecialchars($item['price']); ?></p>
                     <div class="quantity-control">
-                        <button class="quantity-button" onclick="changeQuantity(<?php echo $item['product_id']; ?>, -1)">-</button>
-                        <span class="quantity-display" id="quantity-<?php echo $item['product_id']; ?>"><?php echo intval($item['quantity']); ?></span>
-                        <button class="quantity-button" onclick="changeQuantity(<?php echo $item['product_id']; ?>, 1)">+</button>
+                        <span class="quantity-display">
+                            <?php echo intval($item['quantity']); ?>
+                        </span>
                     </div>
                 </div>
                 <img src="../uploads/remove.jpg" alt="Remove" class="remove-icon" onclick="removeItem(<?php echo $item['cart_id']; ?>)">
@@ -262,13 +254,6 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
         if (confirm("Are you sure you want to remove this item?")) {
             window.location.href = "remove_from_cart.php?id=" + cartId;
         }
-    }
-
-    function changeQuantity(productId, change) {
-        const quantityElement = document.getElementById('quantity-' + productId);
-        let currentQuantity = parseInt(quantityElement.innerText);
-        currentQuantity = Math.max(1, currentQuantity + change);
-        quantityElement.innerText = currentQuantity;
     }
 </script>
 

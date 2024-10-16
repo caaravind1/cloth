@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'];
 
     // Fetch user details from the database
-    $sql = "SELECT id, full_name, password FROM users WHERE email = ?";
+    $sql = "SELECT id, full_name, password, role_id FROM users WHERE email = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -30,26 +30,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
         
-        // Verify password (assuming password is hashed in the database)
-        if (password_verify($password, $user['password'])) {
-            // Password is correct, set session variables
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['full_name'] = $user['full_name'];
+        // Check if the user is a customer (role_id = 1)
+        if ($user['role_id'] == 1) { 
+            // Verify password (assuming password is hashed in the database)
+            if (password_verify($password, $user['password'])) {
+                // Password is correct, set session variables
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['full_name'] = $user['full_name'];
 
-            // Redirect to the originally requested page or browse_products.php by default
-            if (isset($_SESSION['redirect_to']) && strpos($_SESSION['redirect_to'], 'customer_register.php') === false) {
-                header('Location: ' . $_SESSION['redirect_to']);
-                unset($_SESSION['redirect_to']);
-                exit();
+                // Redirect to the originally requested page or browse_products.php by default
+                if (isset($_SESSION['redirect_to']) && strpos($_SESSION['redirect_to'], 'customer_register.php') === false) {
+                    header('Location: ' . $_SESSION['redirect_to']);
+                    unset($_SESSION['redirect_to']);
+                    exit();
+                } else {
+                    header('Location: browse_products.php'); // Default after login
+                    exit();
+                }
             } else {
-                header('Location: browse_products.php'); // Default after login
-                exit();
+                $error = "Invalid password.";
             }
         } else {
-            echo "Invalid password.";
+            $error = "You are not authorized to log in as a customer.";
         }
     } else {
-        echo "No user found with that email.";
+        $error = "No user found with that email.";
     }
     
     $stmt->close();
@@ -97,12 +102,18 @@ if (!isset($_SESSION['user_id']) && isset($_SERVER['HTTP_REFERER']) && strpos($_
             border-radius: 50px;
             padding: 10px 20px;
         }
+        .text-danger {
+            color: #dc3545; /* Bootstrap danger color */
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2 class="text-center">Customer Login</h2>
+    <?php if (isset($error)): ?>
+        <div class="alert alert-danger"><?php echo $error; ?></div>
+    <?php endif; ?>
     <form method="POST">
         <div class="form-group">
             <label for="email">Email:</label>
@@ -114,7 +125,7 @@ if (!isset($_SESSION['user_id']) && isset($_SERVER['HTTP_REFERER']) && strpos($_
         </div>
         <button type="submit" class="btn btn-primary btn-block">Login</button>
     </form>
-    <p class="text-center"><a href="customer_register.php">Create an account</a></p>
+    <p class="text-center"><a href="customer_register.php" class="text-white">Create an account</a></p>
 </div>
 
 </body>
