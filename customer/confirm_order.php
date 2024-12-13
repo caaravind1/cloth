@@ -257,6 +257,65 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
         }
     });
 </script>
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h4>My Account</h4>
+            <ul>
+                <li><a href="#">Order Status</a></li>
+                <li><a href="#">Sign In/Register</a></li>
+                <li><a href="#">Returns</a></li>
+            </ul>
+        </div>
 
+        <div class="footer-section">
+            <h4>Shop</h4>
+            <ul>
+                <li><a href="#">Women</a></li>
+                <li><a href="#">Men</a></li>
+                <li><a href="#">Kids</a></li>
+                <li><a href="#">Sale</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Help</h4>
+            <ul>
+                <li><a href="#">FAQs</a></li>
+                <li><a href="#">Return Policy</a></li>
+                <li><a href="#">Size Guide</a></li>
+                <li><a href="#">Contact Us</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Company</h4>
+            <ul>
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Careers</a></li>
+                <li><a href="#">Store Locator</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Customer Service</h4>
+            <p>Email: support@clothingstore.com</p>
+            <p>Phone: 000-800-919-1686</p>
+            <p>Hours: Mon-Fri 9:00 AM - 7:00 PM</p>
+        </div>
+    </div>
+
+    <div class="social-media">
+        <p>Follow Us</p>
+        <a href="#"><img src="../uploads/facebook.png" alt="Facebook"></a>
+        <a href="#"><img src="../uploads/instagram.png" alt="Instagram"></a>
+        <a href="#"><img src="../uploads/twitter.png" alt="Twitter"></a>
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; 2024 Clothing Store. All rights reserved.</p>
+        <p><a href="#">Privacy Policy</a></p>
+    </div>
+</footer>
 </body>
 </html>

@@ -10,7 +10,7 @@ if ($conn->connect_error) {
 if (isset($_GET['id'])) {
     $product_id = $_GET['id'];
 
-    $stmt = $conn->prepare("SELECT id, name, price, description, image FROM products WHERE id = ?");
+    $stmt = $conn->prepare("SELECT id, name, price, description, image, stock FROM products WHERE id = ?");
     $stmt->bind_param("i", $product_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -71,6 +71,84 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <style>
+        body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+}
+
+.footer {
+    background-color: #000;
+    color: #fff;
+    padding: 20px 0;
+}
+
+.footer-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.footer-section {
+    margin-bottom: 20px;
+    min-width: 200px;
+}
+
+.footer-section h4 {
+    margin-bottom: 10px;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section ul li {
+    margin-bottom: 5px;
+}
+
+.footer-section ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.footer-section ul li a:hover {
+    text-decoration: underline;
+}
+
+.social-media {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.social-media p {
+    margin-bottom: 10px;
+}
+
+.social-media a img {
+    width: 24px;
+    margin: 0 10px;
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 12px;
+}
+
+.footer-bottom a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.footer-bottom a:hover {
+    text-decoration: underline;
+}
+
+        /* Referencing existing CSS from provided code */
         body { font-family: 'Poppins', sans-serif; background-image: url('../uploads/mainbg.jpg'); background-size: cover; min-height: 100vh; color: #fff; }
         .header, .sticky-nav { background-color: #1f1f1f; padding: 15px; text-align: center; border-bottom: 1px solid #333; }
         .sticky-nav { position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; z-index: 1000; }
@@ -84,19 +162,10 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
         .container { margin-top: 50px; background-color: #1f1f1f; border-radius: 10px; padding: 20px; max-width: 600px; }
         .product-img { max-width: 100%; height: auto; border-radius: 10px; }
         .price { font-size: 1.5rem; color: #00ccff; }
+        .stock-warning { color: #ff6347; font-weight: bold; }
         .review { background-color: #2c2c2e; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        /* Dark mode styling for text area and select dropdown */
-        .form-control {
-            background-color: #333;
-            color: #ffffff;
-            border: 1px solid #555;
-        }
-        .form-control:focus {
-            background-color: #444;
-            color: #ffffff;
-            border-color: #00ccff;
-            box-shadow: none;
-        }
+        .form-control { background-color: #333; color: #ffffff; border: 1px solid #555; }
+        .form-control:focus { background-color: #444; color: #ffffff; border-color: #00ccff; box-shadow: none; }
     </style>
 </head>
 <body>
@@ -124,6 +193,12 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
 <div class="container">
     <img src="../uploads/<?php echo htmlspecialchars($product['image']); ?>" class="product-img" alt="<?php echo htmlspecialchars($product['name']); ?>">
     <p class="price">$<?php echo htmlspecialchars($product['price']); ?></p>
+    
+    <!-- Stock Warning Section -->
+    <?php if ($product['stock'] <= 5): ?>
+        <p class="stock-warning">Hurry, just <?php echo htmlspecialchars($product['stock']); ?> left in stock!</p>
+    <?php endif; ?>
+
     <p><?php echo htmlspecialchars($product['description']); ?></p>
 
     <form method="POST">
@@ -179,6 +254,65 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
         }
     });
 </script>
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h4>My Account</h4>
+            <ul>
+                <li><a href="#">Order Status</a></li>
+                <li><a href="#">Sign In/Register</a></li>
+                <li><a href="#">Returns</a></li>
+            </ul>
+        </div>
 
+        <div class="footer-section">
+            <h4>Shop</h4>
+            <ul>
+                <li><a href="#">Women</a></li>
+                <li><a href="#">Men</a></li>
+                <li><a href="#">Kids</a></li>
+                <li><a href="#">Sale</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Help</h4>
+            <ul>
+                <li><a href="#">FAQs</a></li>
+                <li><a href="#">Return Policy</a></li>
+                <li><a href="#">Size Guide</a></li>
+                <li><a href="#">Contact Us</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Company</h4>
+            <ul>
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Careers</a></li>
+                <li><a href="#">Store Locator</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Customer Service</h4>
+            <p>Email: support@clothingstore.com</p>
+            <p>Phone: 000-800-919-1686</p>
+            <p>Hours: Mon-Fri 9:00 AM - 7:00 PM</p>
+        </div>
+    </div>
+
+    <div class="social-media">
+        <p>Follow Us</p>
+        <a href="#"><img src="../uploads/facebook.png" alt="Facebook"></a>
+        <a href="#"><img src="../uploads/instagram.png" alt="Instagram"></a>
+        <a href="#"><img src="../uploads/twitter.png" alt="Twitter"></a>
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; 2024 Clothing Store. All rights reserved.</p>
+        <p><a href="#">Privacy Policy</a></p>
+    </div>
+</footer>
 </body>
 </html>

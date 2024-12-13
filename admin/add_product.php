@@ -24,15 +24,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $price = $_POST['price'];
     $description = $_POST['description'];
     $category_id = $_POST['category_id'];
+    $stock = $_POST['stock']; // New stock field
 
     // Handle image upload
-    $target_dir = "../uploads/"; // Target directory for images
+    $target_dir = "../uploads/";
     $image = basename($_FILES["image"]["name"]);
-    $target_file = $target_dir . $image; // Full path to save the image
+    $target_file = $target_dir . $image;
     $uploadOk = 1;
     $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
-    // Check if image file is a valid image or fake image
+    // Check if image file is valid
     $check = getimagesize($_FILES["image"]["tmp_name"]);
     if ($check !== false) {
         $uploadOk = 1;
@@ -57,12 +58,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($uploadOk == 0) {
         echo "Sorry, your file was not uploaded.";
     } else {
-        // if everything is ok, try to upload file
         if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
             // Insert the product into the database
-            $sql = "INSERT INTO products (name, price, description, image, category_id) VALUES (?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO products (name, price, description, image, category_id, stock) VALUES (?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sdssi", $name, $price, $description, $image, $category_id);
+            $stmt->bind_param("sdssii", $name, $price, $description, $image, $category_id, $stock);
 
             if ($stmt->execute()) {
                 echo "Product added successfully!";
@@ -94,30 +94,36 @@ $conn->close();
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f7f7f7; /* Light background */
-            color: #333333; /* Darker text for readability */
+            background-image: url('../uploads/adminbg.jpg'); 
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #ffffff;
+            min-height: 100vh;
+            margin: 0;
         }
 
         .container {
             margin-top: 50px;
             border-radius: 10px;
-            background-color: #ffffff; /* White container for a clean look */
+            background-color: #ffffff;
             padding: 20px;
             max-width: 800px;
             margin: 50px auto;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Soft shadow */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
             font-size: 2rem;
-            color: #333333; /* Dark heading */
+            color: #333333;
             font-weight: 600;
             margin-bottom: 30px;
         }
 
         label {
             font-weight: bold;
-            color: #555555; /* Slightly muted label color */
+            color: #555555;
         }
 
         .form-control {
@@ -193,8 +199,14 @@ $conn->close();
         </div>
 
         <div class="form-group">
+            <label for="stock">Number of Stocks</label>
+            <input type="number" class="form-control" name="stock" id="stock" required>
+        </div>
+
+        <div class="form-group">
             <label for="image">Product Image</label>
-            <input type="file" class="form-control-file" name="image" id="image" required>
+            <p id="file-name" style="color: #333333; font-weight: bold;"></p>
+            <input type="file" class="form-control-file" name="image" id="image" required onchange="showFileName()">
         </div>
 
         <button type="submit" class="btn btn-primary btn-block">Add Product</button>
@@ -203,6 +215,14 @@ $conn->close();
     <br>
     <a href="admin_home.php" class="btn btn-secondary btn-block">Back to Admin Home</a>
 </div>
+
+<script>
+    function showFileName() {
+        var fileInput = document.getElementById('image');
+        var fileName = fileInput.files[0].name;
+        document.getElementById('file-name').innerText = "Selected file: " + fileName;
+    }
+</script>
 
 </body>
 </html>

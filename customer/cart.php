@@ -14,8 +14,8 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Fetch items in the cart
-$sql = "SELECT c.id AS cart_id, c.quantity, p.id AS product_id, p.name, p.price, p.image 
+// Fetch cart items
+$sql = "SELECT c.id AS cart_id, p.id AS product_id, p.name, p.price, p.image 
         FROM cart c 
         JOIN products p ON c.product_id = p.id 
         WHERE c.user_id = ?";
@@ -23,8 +23,6 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
-
-$conn->close();
 
 $cart_access = isset($_SESSION['user_id']);
 $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_name'] : '';
@@ -41,14 +39,14 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background-image: url('../uploads/mainbg.jpg'); 
-            background-size: cover; 
-            background-position: center; 
-            background-repeat: no-repeat; 
-            background-attachment: fixed; 
-            color: #ffffff; 
-            min-height: 100vh; 
-            margin: 0; 
+            background-image: url('../uploads/mainbg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #fff;
+            min-height: 100vh;
+            margin: 0;
         }
 
         .header {
@@ -60,7 +58,7 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
 
         .header h1 {
             margin: 0;
-            color: #ffffff;
+            color: #fff;
         }
 
         .sticky-nav {
@@ -88,7 +86,6 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
         .profile-icon {
             display: flex;
             align-items: center;
-            position: relative;
             cursor: pointer;
         }
 
@@ -156,20 +153,6 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
             margin-left: 20px;
         }
 
-        .quantity-control {
-            display: flex;
-            align-items: center;
-            margin-left: 20px;
-        }
-
-        .quantity-display {
-            padding: 5px 10px;
-            border: 1px solid #007bff;
-            border-radius: 5px;
-            min-width: 30px;
-            text-align: center;
-        }
-
         .btn-primary {
             background-color: #007bff;
             border: none;
@@ -211,6 +194,12 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
     </div>
 </div>
 
+<?php if (isset($_GET['message'])): ?>
+    <div class="alert alert-info text-center" role="alert">
+        <?php echo htmlspecialchars($_GET['message']); ?>
+    </div>
+<?php endif; ?>
+
 <div class="container">
     <?php if ($result->num_rows == 0): ?>
         <p>Your cart is empty.</p>
@@ -222,11 +211,6 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
                 <div style="flex-grow: 1;">
                     <h5><?php echo htmlspecialchars($item['name']); ?></h5>
                     <p>Price: $<?php echo htmlspecialchars($item['price']); ?></p>
-                    <div class="quantity-control">
-                        <span class="quantity-display">
-                            <?php echo intval($item['quantity']); ?>
-                        </span>
-                    </div>
                 </div>
                 <img src="../uploads/remove.jpg" alt="Remove" class="remove-icon" onclick="removeItem(<?php echo $item['cart_id']; ?>)">
             </div>
@@ -238,12 +222,12 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
 </div>
 
 <script>
-    document.getElementById('profileDropdown').addEventListener('click', function() {
+    document.getElementById('profileDropdown').addEventListener('click', function () {
         const dropdown = document.getElementById('dropdownMenu');
         dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
     });
 
-    document.addEventListener('click', function(event) {
+    document.addEventListener('click', function (event) {
         const dropdown = document.getElementById('dropdownMenu');
         if (!document.getElementById('profileDropdown').contains(event.target)) {
             dropdown.style.display = 'none';
@@ -256,6 +240,65 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
         }
     }
 </script>
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h4>My Account</h4>
+            <ul>
+                <li><a href="#">Order Status</a></li>
+                <li><a href="#">Sign In/Register</a></li>
+                <li><a href="#">Returns</a></li>
+            </ul>
+        </div>
 
+        <div class="footer-section">
+            <h4>Shop</h4>
+            <ul>
+                <li><a href="#">Women</a></li>
+                <li><a href="#">Men</a></li>
+                <li><a href="#">Kids</a></li>
+                <li><a href="#">Sale</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Help</h4>
+            <ul>
+                <li><a href="#">FAQs</a></li>
+                <li><a href="#">Return Policy</a></li>
+                <li><a href="#">Size Guide</a></li>
+                <li><a href="#">Contact Us</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Company</h4>
+            <ul>
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Careers</a></li>
+                <li><a href="#">Store Locator</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Customer Service</h4>
+            <p>Email: support@clothingstore.com</p>
+            <p>Phone: 000-800-919-1686</p>
+            <p>Hours: Mon-Fri 9:00 AM - 7:00 PM</p>
+        </div>
+    </div>
+
+    <div class="social-media">
+        <p>Follow Us</p>
+        <a href="#"><img src="../uploads/facebook.png" alt="Facebook"></a>
+        <a href="#"><img src="../uploads/instagram.png" alt="Instagram"></a>
+        <a href="#"><img src="../uploads/twitter.png" alt="Twitter"></a>
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; 2024 Clothing Store. All rights reserved.</p>
+        <p><a href="#">Privacy Policy</a></p>
+    </div>
+</footer>
 </body>
 </html>

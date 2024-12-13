@@ -152,6 +152,83 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
             font-weight: bold;
             margin-top: 20px;
         }
+        body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+}
+
+.footer {
+    background-color: #000;
+    color: #fff;
+    padding: 20px 0;
+}
+
+.footer-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.footer-section {
+    margin-bottom: 20px;
+    min-width: 200px;
+}
+
+.footer-section h4 {
+    margin-bottom: 10px;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section ul li {
+    margin-bottom: 5px;
+}
+
+.footer-section ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.footer-section ul li a:hover {
+    text-decoration: underline;
+}
+
+.social-media {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.social-media p {
+    margin-bottom: 10px;
+}
+
+.social-media a img {
+    width: 24px;
+    margin: 0 10px;
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 12px;
+}
+
+.footer-bottom a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.footer-bottom a:hover {
+    text-decoration: underline;
+}
+
     </style>
 </head>
 <body>
@@ -213,6 +290,65 @@ $user_name = $cart_access && isset($_SESSION['full_name']) ? $_SESSION['full_nam
         }
     });
 </script>
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h4>My Account</h4>
+            <ul>
+                <li><a href="#">Order Status</a></li>
+                <li><a href="#">Sign In/Register</a></li>
+                <li><a href="#">Returns</a></li>
+            </ul>
+        </div>
 
+        <div class="footer-section">
+            <h4>Shop</h4>
+            <ul>
+                <li><a href="#">Women</a></li>
+                <li><a href="#">Men</a></li>
+                <li><a href="#">Kids</a></li>
+                <li><a href="#">Sale</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Help</h4>
+            <ul>
+                <li><a href="#">FAQs</a></li>
+                <li><a href="#">Return Policy</a></li>
+                <li><a href="#">Size Guide</a></li>
+                <li><a href="#">Contact Us</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Company</h4>
+            <ul>
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Careers</a></li>
+                <li><a href="#">Store Locator</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Customer Service</h4>
+            <p>Email: support@clothingstore.com</p>
+            <p>Phone: 000-800-919-1686</p>
+            <p>Hours: Mon-Fri 9:00 AM - 7:00 PM</p>
+        </div>
+    </div>
+
+    <div class="social-media">
+        <p>Follow Us</p>
+        <a href="#"><img src="../uploads/facebook.png" alt="Facebook"></a>
+        <a href="#"><img src="../uploads/instagram.png" alt="Instagram"></a>
+        <a href="#"><img src="../uploads/twitter.png" alt="Twitter"></a>
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; 2024 Clothing Store. All rights reserved.</p>
+        <p><a href="#">Privacy Policy</a></p>
+    </div>
+</footer>
 </body>
 </html>

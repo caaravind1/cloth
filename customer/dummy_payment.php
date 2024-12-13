@@ -7,14 +7,12 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
+$order_id = $_POST['order_id'] ?? '12345'; // Replace '12345' with an actual test order ID for testing purposes
 
-// Check if order_id is present in the POST request
-if (!isset($_POST['order_id'])) {
+if (!$order_id) {
     echo "No order specified.";
     exit();
 }
-
-$order_id = $_POST['order_id'];
 
 // Create connection
 $conn = new mysqli("localhost", "root", "", "cloth");
@@ -66,15 +64,15 @@ $conn->close();
             margin: 0; 
         }
         .header {
-            background-color: #1f1f1f; /* Header background */
+            background-color: #1f1f1f;
             padding: 15px 20px;
             text-align: center;
-            border-bottom: 1px solid #333; /* Light border for separation */
+            border-bottom: 1px solid #333;
         }
 
         .header h1 {
             margin: 0;
-            color: #ffffff; /* White for heading */
+            color: #ffffff;
         }
 
         .sticky-nav {
@@ -84,26 +82,26 @@ $conn->close();
             z-index: 1000;
             border-bottom: 1px solid #333;
             padding: 10px 0;
-            display: flex; /* Use flexbox for alignment */
-            justify-content: space-between; /* Space out elements */
-            align-items: center; /* Center items vertically */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .sticky-nav a {
-            color: #00ccff; /* Bright color for links */
+            color: #00ccff;
             text-decoration: none;
             padding: 10px 20px;
         }
 
         .sticky-nav a:hover {
-            background-color: rgba(255, 255, 255, 0.1); /* Light hover effect */
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         .profile-icon {
             display: flex;
             align-items: center;
             position: relative;
-            cursor: pointer; /* Change cursor to pointer for hover */
+            cursor: pointer;
         }
 
         .profile-icon img {
@@ -115,14 +113,14 @@ $conn->close();
 
         .dropdown {
             position: absolute;
-            display: none; /* Initially hidden */
+            display: none;
             background-color: #1f1f1f;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
             z-index: 1;
             min-width: 160px; 
-            border-radius: 5px; /* Rounded corners */
-            top: 50px; /* Move dropdown below the profile icon */
-            right: 0; /* Align dropdown to the right of the profile icon */
+            border-radius: 5px;
+            top: 50px;
+            right: 0;
         }
 
         .dropdown-content a {
@@ -131,7 +129,7 @@ $conn->close();
             text-decoration: none;
             display: block;
             text-align: left;
-            transition: background-color 0.3s; /* Smooth background transition */
+            transition: background-color 0.3s;
         }
 
         .dropdown-content a:hover {
@@ -141,24 +139,24 @@ $conn->close();
         .container {
             margin-top: 20px;
             border-radius: 20px;
-            background-color: #1f1f1f; /* Darker container background */
+            background-color: #1f1f1f;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             padding: 20px;
-            max-width: 800px; /* Increased width for larger displays */
+            max-width: 800px;
             margin: 50px auto;
         }
 
         .btn-primary {
             background-color: #007bff;
             border: none;
-            border-radius: 25px; /* Increased for oval shape */
-            padding: 10px 20px; /* Adjusted padding for a better oval shape */
+            border-radius: 25px;
+            padding: 10px 20px;
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
 
         .btn-primary:hover {
-            background-color: #0056b3; /* Darker blue on hover */
+            background-color: #0056b3;
         }
     </style>
 </head>
