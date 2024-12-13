@@ -516,4 +516,3 @@ unset($_SESSION['cart_message']); // Clear the message after displaying
 </footer>
 </body>
 </html>
-hi hello
